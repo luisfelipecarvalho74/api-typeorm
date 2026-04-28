@@ -6,7 +6,7 @@ import { BadRequestError, NotFoundError } from "../helpers/apiError"
 import { validate } from "class-validator"
 import { IValidationError } from "../types/IvalidationError"
 import { formatErrors } from "../helpers/formatErrors"
-import { title } from "node:process"
+import { nextTick, title } from "node:process"
 
 export class PostController {
   private postRepository = AppDataSource.getRepository(Post)
@@ -47,15 +47,39 @@ export class PostController {
   async update (req: Request, res: Response, NextFunction) {
     try {
       const id = Number(req.params.id)
+      const { title, content } = req.body
       if (isNaN(id)) {
         throw new BadRequestError("ID inválido")
       }
-      const post = this.postRepository.findOneBy({ id })
+      const post = await this.postRepository.findOneBy({ id })
       if (!post) {
         throw new NotFoundError("Post não encontrado")
       }
-    } catch (error) {
+      post.title = title ?? post.title
+      post.content = content ?? post.content
+      const errors = await validate(post)
+      if (errors.length > 0) {
+        const formattedErrors = formatErrors(errors)
+        throw new BadRequestError("Falha na verificação", formattedErrors)
+      }
+      await this.postRepository.save(post)
+      return res.json(post)
+    } catch (error: unknown) {
+      next(error)
+    }
+  }
 
+  async delet (req:Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id)
+      const post = await this.postRepository.findOneBy({ id })
+      if (!post) {
+        throw new NotFoundError("Post não encontrado.")
+      }
+      await this.postRepository.delete(id)
+      return res.status(204).send()
+    } catch (error: unknown) {
+      next(error)
     }
   }
 }

@@ -10,8 +10,8 @@ export  class UserController {
 
     async create(req: Request, res: Response, next: NextFunction) {
         try {
-            const {firstName, lastName, phone} = req.body
-            const newUser = this.userRepository.create({firstName, lastName, phone}) 
+            const {firstName, lastName, email} = req.body
+            const newUser = this.userRepository.create({firstName, lastName, email}) 
             const errors = await validate(newUser)
             if (errors.length > 0) {
               const formattedErrors = formatErrors(errors)
@@ -27,16 +27,28 @@ export  class UserController {
     async update (req: Request, res: Response, next: NextFunction) {
         try {
             const id = Number (req.params.id)
-            const { firstName, lastName }  = req.body
+            const { firstName, lastName, email }  = req.body
             if(isNaN(id)) {
-                throw new NotFoundError("ID inválido")
+                throw new BadRequestError("ID inválido")
             }
             const user = await this.userRepository.findOneBy({ id })
             if (!user) {
                 throw new NotFoundError("Usuário não encontrado.")
             }
+            if (email && email !== user.email) {
+              const existingUser = await this.userRepository.findOneBy({ email })
+              if (existingUser) {
+                throw new BadRequestError("E-mail fornecido já está em uso")
+              }
+            }
             user.firstName = firstName ?? user.firstName
             user.lastName = lastName ?? user.lastName
+            user.email = email ?? user.email
+            const errors = await validate(user)
+            if (errors.length > 0) {
+              const formattedErrors = formatErrors(errors)
+              throw new BadRequestError("Falha  na validação", formattedErrors)
+            }
             await this.userRepository.save(user)
             return res.json(user)
           } catch (error: unknown) {
