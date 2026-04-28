@@ -2,10 +2,36 @@ GET  http://localhost:3000/api/users
 
 ###
 
+GET http://localhost:3000/api/users/active
+
+###
+
+GET http://localhost:3000/api/users/3
+
+###
+
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-    "firstName": "Luis Felipe",
+    "firstName": "Mel",
+    "lastName": "Vieira"
+}
+
+###
+
+DELETE http://localhost:3000/api/users/1
+
+###
+
+patch http://localhost:3000/api/users/6
+Content-Type: application/json
+
+{
+    "firstName": "Mel",
     "lastName": "Carvalho"
 }
+
+### 
+
+PATCH http://localhost:3000/api/users/4/toggle

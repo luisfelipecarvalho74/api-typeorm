@@ -4,7 +4,12 @@ import { UserController } from "../controller/UserController"
 const router = Router() 
 const userController = new UserController()
 
-router.post("/", (req, res) => userController.create(req, res))
-router.get("/", (req, res) => userController.list(req, res))
+router.post("/", userController.create)
+router.patch("/:id/toggle", userController.toggleActive)
+router.patch("/:id", userController.update)
+router.get("/", userController.list)
+router.get("/active", userController.listActive)
+router.get("/:id", userController.listById)
+router.delete("/:id", userController.delete)
 
-export const userRoutes = Router()
+export const userRoutes = router
