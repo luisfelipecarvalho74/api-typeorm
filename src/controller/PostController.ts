@@ -6,7 +6,6 @@ import { BadRequestError, NotFoundError } from "../helpers/apiError"
 import { validate } from "class-validator"
 import { IValidationError } from "../types/IvalidationError"
 import { formatErrors } from "../helpers/formatErrors"
-import { nextTick, title } from "node:process"
 
 export class PostController {
   private postRepository = AppDataSource.getRepository(Post)
@@ -44,7 +43,7 @@ export class PostController {
     }
   }
 
-  async update (req: Request, res: Response, NextFunction) {
+  async update (req: Request, res: Response,next: NextFunction) {
     try {
       const id = Number(req.params.id)
       const { title, content } = req.body
